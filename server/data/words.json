@@ -1,0 +1,8 @@
+{
+  "categories": {
+    "Animals": ["Dog", "Cat", "Elephant"],
+    "Foods": ["Pizza", "Burger", "Sushi"],
+    "Movies": ["Inception", "The Matrix", "Toy Story"]
+    // Add more categories and words as needed
+  }
+}
