@@ -1,5 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import PlayerLobby from './PlayerLobby';
+import io from 'socket.io-client';
+
+
 
 const CenteredDiv = styled.div`
     display: flex;
@@ -35,6 +39,34 @@ const StyledInput = styled.input`
 const PhoneLobby = () => {
     const [sessionCode, setSessionCode] = useState('');
     const [playerName, setPlayerName] = useState('');
+    const [hasJoined, setHasJoined] = useState(false); // New state to track if the user has joined the session
+    const [players, setPlayers] = useState([]); // State to track the players in the session
+    const [error, setError] = useState(''); // State to handle error messages
+    const [socket, setSocket] = useState(null);
+
+
+    // Initialize socket connection when player joins the session
+    useEffect(() => {
+        // Only attempt to create a socket connection if the user has joined
+        if (hasJoined) {
+            const newSocket = io('http://localhost:4000', {
+                query: { sessionCode, playerName }
+            });
+            setSocket(newSocket);
+
+            newSocket.on('playerJoined', (player) => {
+                setPlayers(prevPlayers => [...prevPlayers, player]);
+            });
+
+            // Add more event listeners as needed
+
+            // Clean up the socket connection when the component unmounts or the user leaves
+            return () => {
+                newSocket.disconnect();
+            };
+        }
+    }, [hasJoined, sessionCode, playerName]);
+
 
     const createSession = () => {
         fetch(`${import.meta.env.VITE_BACKEND_URL}/api/game/create`, {
@@ -65,30 +97,44 @@ const PhoneLobby = () => {
             .then(response => response.json())
             .then(data => {
                 console.log('Joined the session successfully:', data);
+                setHasJoined(true); // Set hasJoined to true when the session is joined successfully
+                setPlayers(Array.isArray(data.players) ? data.players : []);
             })
             .catch((error) => {
                 console.error('Error joining session:', error);
+                setError('Error joining session. Please check your session code and try again.');
+
             });
     };
+    const startGame = () => {
+        if (socket) {
+                socket.emit('startGame', { sessionCode });
+            }
+        };
 
-    return (
-        <CenteredDiv>
-            <StyledButton onClick={createSession}>Create New Game Session</StyledButton>
-            <StyledInput
-                type="text"
-                placeholder="Session Code"
-                value={sessionCode}
-                onChange={(e) => setSessionCode(e.target.value)}
-            />
-            <StyledInput
-                type="text"
-                placeholder="Name"
-                value={playerName}
-                onChange={(e) => setPlayerName(e.target.value)}
-            />
-            <StyledButton onClick={joinSession}>Join Session</StyledButton>
-        </CenteredDiv>
-    );
+    if (hasJoined) {
+        // Render the PlayerLobby component when the user has joined the session
+        return <PlayerLobby sessionCode={sessionCode} players={players} onStartGame={startGame} />;
+    } else {
+        return (
+            <CenteredDiv>
+                <StyledButton onClick={createSession}>Create New Game Session</StyledButton>
+                <StyledInput
+                    type="text"
+                    placeholder="Session Code"
+                    value={sessionCode}
+                    onChange={(e) => setSessionCode(e.target.value)}
+                />
+                <StyledInput
+                    type="text"
+                    placeholder="Name"
+                    value={playerName}
+                    onChange={(e) => setPlayerName(e.target.value)}
+                />
+                <StyledButton onClick={joinSession}>Join Session</StyledButton>
+            </CenteredDiv>
+        );
+    }
 };
 
 export default PhoneLobby;
