@@ -1,35 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// App.js
 
-function App() {
-  const [count, setCount] = useState(0)
+import React, { useState } from 'react';
+import './App.css';
+import PhoneLobby from './components/PhoneLobby.jsx';
+import TvLobby from './components/TvLobby.jsx';
+import styled from 'styled-components';
 
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+const StyledApp = styled.div`
+    font-family: Arial, sans-serif;
+    overflow: hidden; 
+    min-height: 100vh; // Full view height
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+`;
 
-export default App
+const StyledTabButton = styled.button`
+    font-size: 22px; /* Increase font size */
+    padding: 12px 0; /* Add more padding */
+    width: 125px;
+    cursor: pointer;
+`;
+
+
+const App = () => {
+    const [activeTab, setActiveTab] = useState('phone');
+
+    return (
+        <StyledApp>
+        <div className="App">
+            <div className="tabs">
+                <StyledTabButton
+                    className={`tab-button ${activeTab === 'phone' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('phone')}
+                >
+                    Phone
+                </StyledTabButton>
+                <StyledTabButton
+                    className={`tab-button ${activeTab === 'tv' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('tv')}
+                >
+                    TV
+                </StyledTabButton>
+            </div>
+            <div className="tab-content">
+                {activeTab === 'phone' && <PhoneLobby />}
+                {activeTab === 'tv' && <TvLobby />}
+            </div>
+        </div>
+        </StyledApp>
+    );
+};
+
+export default App;

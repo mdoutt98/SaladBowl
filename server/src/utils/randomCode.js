@@ -1,6 +1,6 @@
 // utils/randomCode.js
 
-const generateRandomCode = (length = 5) => {
+const generateRandomCode = (length = 4) => {
     let result = '';
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     const charactersLength = characters.length;
